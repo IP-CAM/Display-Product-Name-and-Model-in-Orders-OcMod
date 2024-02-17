@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<id><![CDATA[Display Product Name and Model in Orders)]]></id>
+	<name><![CDATA[Display Product Name and Model in Orders]]></name>
+	<code>knns-admin-sales-orders-display-product-name-model-v3039</code>
+	<version>1.0.0</version>
+	<author><![CDATA[<font color="#7F458C"><b>kanenas.net (aka Nikolas Branis)</b></font> - nbran@kanenas.net]]></author>
+	<link>https://kanenas.net/</link>
+	<file path="admin/controller/sale/order.php" error="log">
+		<operation error="skip">
+			<search><![CDATA[$data['orders'][] = array(]]></search>
+			<add position="before" index="1"><![CDATA[
+			$order_products = $this->model_sale_order->getOrderProducts($result['order_id']);
+
+			$this->load->model('catalog/product');
+
+			$data['order_products'] = array();
+
+			$product = '';
+			$model   = '';
+			foreach ($order_products as $order_product) {
+				$product .= '- ' . $order_product['name'] . '<br />';
+				$model   .= '- ' . $order_product['model'] . '<br />';
+			}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA['total'         => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),]]></search>
+			<add position="before"><![CDATA[
+				'product'        => $product,
+				'model'          => $model,
+			]]></add>
+		</operation>
+	</file>
+	<file path="admin/view/template/sale/order_list.twig" error="log">
+		<operation error="skip">
+			<search><![CDATA[<td class="text-right">{% if sort == 'o.total' %} <a href="{{ sort_total }}" class="{{ order|lower }}">{{ column_total }}</a> {% else %} <a href="{{ sort_total }}">{{ column_total }}</a> {% endif %}</td>]]></search>
+			<add position="before"><![CDATA[
+                    <td class="text-left">{{ column_product }}</td>
+                    <td class="text-left">{{ column_model }}</td>
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[<td class="text-right">{{ order.total }}</td>]]></search>
+			<add position="before"><![CDATA[
+                  <td class="text-left">{{ order.product }}</td>
+                  <td class="text-left">{{ order.model }}</td>
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[<td class="text-center" colspan="8">{{ text_no_results }}</td>]]></search>
+			<add position="replace"><![CDATA[                  <td class="text-center" colspan="10">{{ text_no_results }}</td>]]></add>
+		</operation>
+	</file>
+</modification>
